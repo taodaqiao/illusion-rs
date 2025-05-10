@@ -1,35 +1,25 @@
-name: Rust
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:  # 👈 添加这个支持手动触发
-
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
   build:
-
     runs-on: windows-latest
-
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Rust 1.82.0  # 👈 添加这步
+      - name: Clean environment
+        run: |
+          Remove-Item -Recurse -Force "$env:USERPROFILE\.cargo\bin\cargo-make.exe" -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force "$env:USERPROFILE\.cargo\registry" -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force "$env:USERPROFILE\.cargo\git" -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force "target" -ErrorAction SilentlyContinue
+
+      - name: Set up Rust 1.61.0
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.82.0
+          toolchain: 1.61.0
           override: true
           profile: minimal
 
       - name: Install cargo-make
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: --debug cargo-make
+        run: cargo install cargo-make --version 0.35.6
 
       - name: Build
         run: cargo make build-debug
